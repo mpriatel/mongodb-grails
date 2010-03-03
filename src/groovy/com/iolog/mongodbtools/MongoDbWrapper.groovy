@@ -102,6 +102,7 @@ public class MongoDbWrapper implements InitializingBean
     */
    public void addMapperModel(String typeName, MongoMapperModel mmm)
    {
+      println mmm
       typeForClassMap.put( mmm.clazz , typeName )
       mappersByTypeName.put(typeName, mmm)
       mappersByClass.put(mmm.clazz,mmm)

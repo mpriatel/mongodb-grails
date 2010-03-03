@@ -2,7 +2,7 @@
   <author>Your name</author>
   <title>Plugin summary/headline</title>
   <description>\
-Brief description of the2 plugin.
+Brief description of the plugin.
 </description>
   <documentation>http://grails.org/plugin/mongodb-tools</documentation>
   <resources>
