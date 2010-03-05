@@ -1,5 +1,6 @@
 import org.codehaus.groovy.grails.web.context.GrailsConfigUtils
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
+import com.iolog.mongodbtools.MongoMapperModel
 
 class MongodbToolsGrailsPlugin
 {
@@ -19,11 +20,13 @@ class MongodbToolsGrailsPlugin
    def authorEmail = ""
    def title = "Plugin summary/headline"
    def description = '''\\
-Brief description of the plugin.
-'''
+      Brief description of the plugin.
+      '''
 
    // URL to the plugin's documentation
    def documentation = "http://grails.org/plugin/mongodb-tools"
+
+   def mongo
 
    def doWithWebDescriptor = { xml ->
       // TODO Implement additions to web.xml (optional), this event occurs before
@@ -42,11 +45,11 @@ Brief description of the plugin.
 
          if ( typeName )
          {
-            def mongoFields = GrailsClassUtils.getStaticPropertyValue(clz.clazz , "mongoFields")   
+            def mongoFields = GrailsClassUtils.getStaticPropertyValue(clz.clazz , "mongoFields")
+            def mmm = new MongoMapperModel(clz.clazz,mongoFields)
+            mmm.setTypeName(typeName)
+            mongo.addMapperModel(typeName,mmm)
          }
-
-
-
       }
    }
 
