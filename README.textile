@@ -81,9 +81,10 @@ p. When your object are converted to documents a property '_t' is added to help 
 
 p. Domain objects can then be coverted to docs by calling the MOP added method "toMongoDoc()".
 
-pre..
+<pre>
     def user = new User( firstName:"mark", lastName:"priatel" )
     def userDoc = user.toMongoDoc()
+</pre>    
 
 p. The mapper will also process mapped properties and Lists:
 
@@ -110,7 +111,9 @@ p. The mapper will also process mapped properties and Lists:
 
   mongo.users.save( user.toMongoDoc() )
 
-  (bson) { "_id" : ObjectId("4b952284d8e992502c9629e3"), "_t" : "u", "fn" : "mark", "ln" : "priatel", "adrs" : { "_t" : "a", "ci" : "ottawa", "co" : "canada" } }
+  (bson)
+      { "_id" : ObjectId("4b952284d8e992502c9629e3"), "_t" : "u", "fn" : "mark",
+      "ln" : "priatel", "adrs" : { "_t" : "a", "ci" : "ottawa", "co" : "canada" } }
 </pre>
 
 h3. MongoDB Document Builder
