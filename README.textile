@@ -74,7 +74,7 @@ p. To register your Domain class with a mapper you need to add two static helper
   }
 </pre>
 
-p. When your object are converted to documents a property '_t' is added to help identify the type.
+p. When your objects are converted to documents a property '_t' is added to help identify the type.
   This type identifier is specified with <code>mongoTypeName</code>.  You then specify which fields
   should be saved, and their respective keys.
 
@@ -83,7 +83,17 @@ p. Domain objects can then be coverted to docs by calling the MOP added method "
 <pre>
     def user = new User( firstName:"mark", lastName:"priatel" )
     def userDoc = user.toMongoDoc()
-</pre>    
+</pre>
+
+p. You can also convert documents retured from queries back into their Domain equivilants
+   using the <code>toObject()</code> method added to BasicDBObject and BasicDBList (via MOP):
+
+<pre>
+  mongo.users.find().each{ doc ->
+     def userDomainObject = doc.toObject()
+  }
+</pre>
+
 
 p. The mapper will also process mapped properties and Lists:
 
