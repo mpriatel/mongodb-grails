@@ -94,7 +94,6 @@ p. You can also convert documents retured from queries back into their Domain eq
   }
 </pre>
 
-
 p. The mapper will also process mapped properties and Lists:
 
 <pre>
@@ -124,6 +123,15 @@ p. The mapper will also process mapped properties and Lists:
       { "_id" : ObjectId("4b952284d8e992502c9629e3"), "_t" : "u", "fn" : "mark",
       "ln" : "priatel", "adrs" : { "_t" : "a", "ci" : "ottawa", "co" : "canada" } }
 </pre>
+
+p. Of course, you can still save your domain objects using GORM.
+
+<pre>
+  def user = new User( firstname:"mark" )
+  user.save()
+  mongo.users.save( user.toMongoDoc() )
+</pre>
+
 
 h3. MongoDB Document Builder
 
