@@ -1,8 +1,8 @@
 <h1>MongoDB Grails Plugin</h1>
 
-p. The MongoDbWrapper is exposed to Grails applications as a Spring bean called 'mongo'.
-   Grails classes can then easily make use of MongoDbWrapper by simply adding a 'mongo'
-   property to their class, eg:
+p. The MongoDB Grails plugin is primarily exposed to Grails applications as a Spring bean called 'mongo'.
+   Grails classes can then easily make use of it throughout their code by simply adding a 'mongo'
+   property to their classes which support dependency injection (domain/controllers/services), eg:
 
 <pre>
   class UserController{
@@ -12,7 +12,7 @@ p. The MongoDbWrapper is exposed to Grails applications as a Spring bean called 
 
 h3. Configuration
 
-p. At startup the MongoDbWrapper will look for a 'mongo' configuration property in your
+p. At startup the MongoDB plugin will look for a 'mongo' configuration property in your
    Config.groovy file which defines your MongoDB databases and related configuration
    properties.
 
@@ -30,7 +30,6 @@ p. At startup the MongoDbWrapper will look for a 'mongo' configuration property 
            host = "192.168.1.2"
         }
      }
-
 
      shortcuts{
         users = "server1/app/users"
