@@ -16,7 +16,7 @@ p. At startup the MongoDbWrapper will look for a 'mongo' configuration property 
    Config.groovy file which defines your MongoDB databases and related configuration
    properties.
 
-pre..
+<pre>
   #Config.groovy
 
   mongo{
@@ -37,6 +37,7 @@ pre..
         comments = "server2/app/comments"
      }
   }
+</pre>
 
 p. The above example registers two different database hosts which can then be accessed using the mongo
   bean: <code>mongo.server1.<dbname>.<collection></code>.  'dbname' and 'collection' will
@@ -64,7 +65,7 @@ p. The MongoDbWrapper makes it easy to save and restore your Grails domain objec
 p. To register your Domain class with a mapper you need to add two static helper fields
   to your class:
 
-pre..
+<pre>
   class User{
     String firstName
     String lastName
@@ -72,6 +73,7 @@ pre..
     static mongoTypeName = "user"
     static mongoMappedFields = ['fn':firstName','ln':'lastName']
   }
+</pre>
 
 p. When your object are converted to documents a property '_t' is added to help identify the type.
   This type identifier is specified with <code>mongoTypeName</code>.  You then specify which fields
@@ -85,7 +87,7 @@ pre..
 
 p. The mapper will also process mapped properties and Lists:
 
-pre..
+<pre>
   class Address{
      String city
      String country
@@ -109,6 +111,7 @@ pre..
   mongo.users.save( user.toMongoDoc() )
 
   (bson) { "_id" : ObjectId("4b952284d8e992502c9629e3"), "_t" : "u", "fn" : "mark", "ln" : "priatel", "adrs" : { "_t" : "a", "ci" : "ottawa", "co" : "canada" } }
+</pre>
 
 h3. MongoDB Document Builder
 
@@ -116,7 +119,7 @@ p. The mongo bean exposes a special root-level property 'doc' which can be used 
   BasicDBObjectS (which are used by the Java driver to represent MongoDB documents) using a
   Groovy builder syntax:
 
-pre..
+<pre>
   def userData = mongo.doc{
      firstName("mark")
      lastName("priatel")
@@ -130,5 +133,6 @@ pre..
   mongo.user.save(userData)
 
   println userData._id
+</pre>
 
 p. -
