@@ -1,0 +1,9 @@
+h1. Grails plugin for MongoDB
+
+p. This plugin adds several features to a Grails project to make working with MongoDB even easier.
+
+h2. Domain Objects
+
+p. This plugin can easily convert your existing Domain objects to Mongo documents
+so that they can be saved and restored to MongoDB
+

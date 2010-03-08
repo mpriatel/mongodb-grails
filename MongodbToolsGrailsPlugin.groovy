@@ -1,6 +1,9 @@
 import org.codehaus.groovy.grails.web.context.GrailsConfigUtils
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import com.iolog.mongodbtools.MongoMapperModel
+import com.mongodb.BasicDBObject
+import com.iolog.mongodbtools.MongoDbWrapper
+import com.iolog.mongodbtools.MongoMapperField
 
 class MongodbToolsGrailsPlugin
 {
@@ -26,7 +29,7 @@ class MongodbToolsGrailsPlugin
    // URL to the plugin's documentation
    def documentation = "http://grails.org/plugin/mongodb-tools"
 
-   def mongo
+   
 
    def doWithWebDescriptor = { xml ->
       // TODO Implement additions to web.xml (optional), this event occurs before
@@ -40,15 +43,46 @@ class MongodbToolsGrailsPlugin
 
 
    def doWithDynamicMethods = { ctx ->
+      MongoDbWrapper mongo = ctx.getBean('mongo')
       application.domainClasses.each { clz ->
-         def typeName = GrailsClassUtils.getStaticPropertyValue(clz.clazz, "mongoTypeName")
+
+         def clazz = clz.clazz
+         def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
 
          if ( typeName )
          {
-            def mongoFields = GrailsClassUtils.getStaticPropertyValue(clz.clazz , "mongoFields")
-            def mmm = new MongoMapperModel(clz.clazz,mongoFields)
+            def mongoFields = GrailsClassUtils.getStaticPropertyValue(clazz , "mongoFields")
+            def mmm = new MongoMapperModel(clazz,mongoFields)
             mmm.setTypeName(typeName)
             mongo.addMapperModel(typeName,mmm)
+         }
+
+         clz.clazz.metaClass.toMongoDoc = {
+
+            def mapper = mongo.getMapperForClass(clazz)
+            if ( !mapper )
+            {
+               def doc = new BasicDBObject()
+               doc.putAll( delegate.properties )
+            }
+            else
+            {
+               return mapper.buildMongoDoc(delegate)
+            }
+            
+         }
+      }
+
+
+      // go through all the registered mappers, and inspect their fields to see
+      // if the field class types are mapped.  if so, associate the mapper
+      mongo.mappersByClass.each { mappedClz, mapper ->
+         mapper.fields.each { MongoMapperField f ->
+            def fieldMapper = mongo.getMapperForClass(f.fieldType)
+            if ( fieldMapper ){
+               println "associating mapper ${fieldMapper} with ${f.domainFieldName}"
+              f.mapper = fieldMapper
+            }
          }
       }
    }
