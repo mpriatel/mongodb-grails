@@ -4,7 +4,7 @@ p. The MongoDbWrapper is exposed to Grails applications as a Spring bean called 
    Grails classes can then easily make use of MongoDbWrapper by simply adding a 'mongo'
    property to their class, eg:
 
-<code>
+<code>{whitespace:pre}
   class UserController{
      def mongo
   }
