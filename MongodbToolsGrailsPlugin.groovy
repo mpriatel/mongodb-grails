@@ -7,23 +7,20 @@ import com.iolog.mongodbtools.MongoMapperField
 
 class MongodbToolsGrailsPlugin
 {
-   // the plugin version
    def version = "0.1"
-   // the version or versions of Grails the plugin is designed for
-   def grailsVersion = "1.2.1 > *"
-   // the other plugins this plugin depends on
+   def grailsVersion = "1.2.0 > *"
    def dependsOn = [:]
-   // resources that are excluded from plugin packaging
    def pluginExcludes = [
       "grails-app/views/error.gsp"
    ]
 
-   // TODO Fill in these fields
-   def author = "Your name"
-   def authorEmail = ""
-   def title = "Plugin summary/headline"
+   def author = "Mark Priatel"
+   def authorEmail = "mpriatel@gmail.com"
+   def title = "MongoDB Tools"
    def description = '''\\
-      Brief description of the plugin.
+      This plugin makes working with MongoDB a little bit more groovy by adding several features such as:
+      a domain object <-> MongoDB Document mapper, database connection management, a groovy-builder to
+      create MongoDB documents.
       '''
 
    // URL to the plugin's documentation
