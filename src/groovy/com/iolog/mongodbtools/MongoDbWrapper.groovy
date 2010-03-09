@@ -69,15 +69,6 @@ public class MongoDbWrapper implements InitializingBean
       if (mongos.containsKey(name)) return mongos.get(name);
       if (shortcuts.containsKey(name)) return shortcuts.get(name);
 
-      // first check shortcuts config to see if the propery references
-      // a DBCollection
-      if (grailsApplication.config.mongo.shortcuts)
-      {
-         grailsApplication.config.mongo.shortcuts.each {
-            println it
-         }
-      }
-
       // if no MongoDB Is registered for the given key, lookup its
       // connection details in grailsApplication.config
       def dbConfig = grailsApplication.config.mongo.databases?."${name}"
@@ -102,7 +93,6 @@ public class MongoDbWrapper implements InitializingBean
     */
    public void addMapperModel(String typeName, MongoMapperModel mmm)
    {
-      println mmm
       typeForClassMap.put( mmm.clazz , typeName )
       mappersByTypeName.put(typeName, mmm)
       mappersByClass.put(mmm.clazz,mmm)
