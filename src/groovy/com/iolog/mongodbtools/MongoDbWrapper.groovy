@@ -240,7 +240,7 @@ public class MongoDbWrapper implements InitializingBean
 
 
       Mongo mongo = new Mongo(dbConfig.host, port)
-      mongo.getDB("X").a
+      
 
       mongos.put(name, mongo)
       return mongo
@@ -253,7 +253,7 @@ public class MongoDbWrapper implements InitializingBean
     */
    public void addMapperModel(String typeName, MongoMapperModel mmm)
    {
-      println mmm
+      
       typeForClassMap.put(mmm.clazz, typeName)
       mappersByTypeName.put(typeName, mmm)
       mappersByClass.put(mmm.clazz, mmm)
@@ -264,7 +264,6 @@ public class MongoDbWrapper implements InitializingBean
     */
    void afterPropertiesSet()
    {
-
       Mongo.metaClass.propertyMissing = { String name ->
          return ((Mongo) delegate).getDB(name)
       }
@@ -281,9 +280,17 @@ public class MongoDbWrapper implements InitializingBean
          }
       }
 
+      Collection.metaClass.toMongoDoc = {
+         BasicDBList newList = new BasicDBList()
+         delegate.each {
+            def mapper = mappersByClass.get(it.getClass())
+            if ( mapper ) newList << mapper.buildMongoDoc(it)
+            else newList << it
+         }
+         return newList
+      }
+
       BasicDBObject.metaClass.toObject = {
-
-
          def typeName = delegate.get("_t")
 
          if (!typeName)

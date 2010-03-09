@@ -54,6 +54,23 @@ class MongodbToolsGrailsPlugin
             mongo.addMapperModel(typeName,mmm)
          }
 
+         /**
+          * inserts the Domain object into mongo and assigns the generated mongo document id
+          * to _id
+          */
+         clz.clazz.metaClass.mongoInsert = { coll ->
+            def doc = delegate.toMongoDoc()
+            coll.insert( doc )
+            delegate._id = doc._id
+         }
+
+         
+         clz.clazz.metaClass.mongoRemove = { coll ->
+            if ( delegate._id ){
+               coll.remove( new BasicDBObject([_id:delegate._id]))
+            }
+         }
+
          clz.clazz.metaClass.toMongoDoc = {
 
             def mapper = mongo.getMapperForClass(clazz)
@@ -66,10 +83,8 @@ class MongodbToolsGrailsPlugin
             {
                return mapper.buildMongoDoc(delegate)
             }
-            
          }
       }
-
 
       // go through all the registered mappers, and inspect their fields to see
       // if the field class types are mapped.  if so, associate the mapper

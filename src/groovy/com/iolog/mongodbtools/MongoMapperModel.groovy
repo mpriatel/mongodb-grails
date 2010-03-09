@@ -51,10 +51,22 @@ class MongoMapperModel {
       fieldNames.each { alias,fieldName ->
          MongoMapperField mmf = new MongoMapperField();
 
-         Class type = GrailsClassUtils.getPropertyType(this.clazz,fieldName)
-         mmf.fieldType = type
+         Map hasManyDef = GrailsClassUtils.getStaticPropertyValue(this.clazz,"hasMany")
+         if ( hasManyDef && hasManyDef.containsKey(fieldName))
+         {
+            mmf.isGrailsHasMany = true
+            mmf.fieldType = hasManyDef.get(fieldName)
+         }
+         else
+         {
+            Class type = GrailsClassUtils.getPropertyType(this.clazz,fieldName)
+            mmf.fieldType = type
+         }
+
          mmf.domainFieldName = fieldName
          mmf.mongoFieldName = alias
+
+         println "${mmf.domainFieldName} = ${mmf.fieldType} (${mmf.isGrailsHasMany})"
 
          fields[idx++] = mmf
       }
@@ -77,8 +89,25 @@ class MongoMapperModel {
          def val = o."${f.domainFieldName}"
          if ( val )
          {
-            if ( f.mapper ) doc.put( f.mongoFieldName , f.mapper.buildMongoDoc(val))
-            else doc.put( f.mongoFieldName , val )
+            if ( f.mapper )
+            {
+               if ( f.isGrailsHasMany )
+               {
+                  doc.put( f.mongoFieldName , val.toMongoDoc() )
+               }
+               else
+               {
+                  doc.put( f.mongoFieldName , f.mapper.buildMongoDoc(val))
+               }
+            }
+            else if ( val instanceof Collection )
+            {
+               doc.put(f.mongoFieldName, val.toMongoDoc() )
+            }
+            else // no mapper associated, store the object as-is
+            {
+               doc.put( f.mongoFieldName , val )
+            }
          }
       }
       return doc

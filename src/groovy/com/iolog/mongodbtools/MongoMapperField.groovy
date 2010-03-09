@@ -31,6 +31,7 @@ class MongoMapperField
    String mongoFieldName
    Class fieldType
    MongoMapperModel mapper
+   boolean isGrailsHasMany
 
    /**
     * flag which indicates that this field's class type has a registered mapper.
