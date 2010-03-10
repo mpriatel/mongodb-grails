@@ -25,7 +25,7 @@ import org.springframework.beans.factory.InitializingBean
 import com.mongodb.DBApiLayer
 import com.mongodb.BasicDBObject
 import com.mongodb.BasicDBList
-
+import com.mongodb.DBCollection
 
 /**
  * <p>The MongoDbWrapper is exposed to Grails applications as a Spring bean called 'mongo'.
@@ -263,6 +263,18 @@ public class MongoDbWrapper implements InitializingBean
          return ((DBApiLayer) delegate).getCollection(name)
       }
 
+      DBCollection.metaClass.update = { Map crit , Map obj , Map options ->
+         boolean multi = false
+         boolean upsert = false
+         if ( options )
+         {
+            multi = options?.multi ?: false
+            upsert = options?.upsert ?: false
+         }
+
+         delegate.update( crit as BasicDBObject , obj as BasicDBObject , upsert, multi )
+      }
+
       BasicDBList.metaClass.toObject = {
          List oList = new ArrayList((int) delegate.size())
          delegate.each {
@@ -301,6 +313,7 @@ public class MongoDbWrapper implements InitializingBean
          // information stored inthe MongoMapperModel
 
          def obj = mmm.clazz.newInstance()
+         obj._id = _self._id
 
          for (MongoMapperField mmf: mmm.fields)
          {

@@ -4,6 +4,7 @@ import com.iolog.mongodbtools.MongoMapperModel
 import com.mongodb.BasicDBObject
 import com.iolog.mongodbtools.MongoDbWrapper
 import com.iolog.mongodbtools.MongoMapperField
+import com.mongodb.ObjectId
 
 class MongodbToolsGrailsPlugin
 {
@@ -69,6 +70,19 @@ class MongodbToolsGrailsPlugin
             if ( delegate._id ){
                coll.remove( new BasicDBObject([_id:delegate._id]))
             }
+         }
+
+         clz.clazz.metaClass.mongoUpdate = { coll , obj ->
+            coll.update(
+               [ _id: new ObjectId( delegate._id) ] as BasicDBObject ,
+               obj as BasicDBObject ,
+               false,
+               false
+            )
+         }
+
+         clz.clazz.metaClass.mongoRemove = { coll ->
+            coll.remove([ _id: new ObjectId( delegate._id) ] as BasicDBObject)
          }
 
          clz.clazz.metaClass.toMongoDoc = {
