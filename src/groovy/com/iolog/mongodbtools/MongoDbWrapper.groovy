@@ -1,22 +1,22 @@
 package com.iolog.mongodbtools;
 
 /**
-           Licensed to the Apache Software Foundation (ASF) under one
-           or more contributor license agreements.  See the NOTICE file
-           distributed with this work for additional information
-           regarding copyright ownership.  The ASF licenses this file
-           to you under the Apache License, Version 2.0 (the
-           "License"); you may not use this file except in compliance
-           with the License.  You may obtain a copy of the License at
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
 
-             http://www.apache.org/licenses/LICENSE-2.0
+ http://www.apache.org/licenses/LICENSE-2.0
 
-           Unless required by applicable law or agreed to in writing,
-           software distributed under the License is distributed on an
-           "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-           KIND, either express or implied.  See the License for the
-           specific language governing permissions and limitations
-           under the License.
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
 
  */
 
@@ -26,6 +26,8 @@ import com.mongodb.DBApiLayer
 import com.mongodb.BasicDBObject
 import com.mongodb.BasicDBList
 import com.mongodb.DBCollection
+import org.codehaus.groovy.grails.commons.GrailsClassUtils
+import com.mongodb.ObjectId
 
 /**
  * <p>The MongoDbWrapper is exposed to Grails applications as a Spring bean called 'mongo'.
@@ -33,10 +35,8 @@ import com.mongodb.DBCollection
  * property to their class, eg:
  *
  * <pre>
- * class UserController{
- *    def mongo
- * }
- * </pre>
+ * class UserController{*    def mongo
+ *}* </pre>
  *
  * <h3>Configuration</h3>
  *
@@ -47,25 +47,15 @@ import com.mongodb.DBCollection
  * <pre>
  * #Config.groovy
  *
- * mongo{
- *    databases{
- *       server1{
- *          host = "localhost"
+ * mongo{*    databases{*       server1{*          host = "localhost"
  *          port = 1234  // if omited, will use the default MongoDB port
- *       }
+ *}*
+ *       server2{*          host = "192.168.1.2"
+ *}*}*
  *
- *       server2{
- *          host = "192.168.1.2"
- *       }
- *    }
- *
- *
- *    shortcuts{
- *       users = "server1/app/users"
+ *    shortcuts{*       users = "server1/app/users"
  *       comments = "server2/app/comments"
- *    }
- * }
- * </pre>
+ *}*}* </pre>
  *
  * <p>The above example registers two different database hosts which can then be accessed using the mongo
  * bean: <code>mongo.server1.&lt;dbname&gt;.&lt;collection&gt;</code>.  'dbname' and 'collection' will
@@ -94,14 +84,12 @@ import com.mongodb.DBCollection
  * to your class:
  *
  * <pre>
- * class User{
- *   String firstName
+ * class User{*   String firstName
  *   String lastName
  *
  *   static mongoTypeName = "user"
  *   static mongoMappedFields = ['fn':firstName','ln':'lastName']
- * }
- * </pre>
+ *}* </pre>
  *
  * <p>When your object are converted to documents a property '_t' is added to help identify the type.
  * This type identifier is specified with <code>mongoTypeName</code>.  You then specify which fields
@@ -117,30 +105,25 @@ import com.mongodb.DBCollection
  * <p>The mapper will also process mapped properties and Lists:
  *
  * <pre>
- * class Address{
- *    String city
+ * class Address{*    String city
  *    String country
  *
  *    static mongoTypeName = "address"
  *    static mongoMappedFields = [ 'ci':'city' , 'co' : 'country' ]
- * }
- *
- * class User{
- *   String firstName
+ *}*
+ * class User{*   String firstName
  *   String lastName
  *   Address address
  *
  *   static mongoTypeName = "user"
  *   static mongoMappedFields = ['fn':firstName','ln':'lastName','adrs':'address']
- * }
- *
+ *}*
  * def adrs = new Address( city:'ottawa' , country:'canada' )
  * def user = new User( firstName:'mark', lastName:'priatel',address:adrs)
  *
  * mongo.users.save( user.toMongoDoc() )
  *
- * (bson) { "_id" : ObjectId("4b952284d8e992502c9629e3"), "_t" : "u", "fn" : "mark", "ln" : "priatel", "adrs" : { "_t" : "a", "ci" : "ottawa", "co" : "canada" } }
- *
+ * (bson) { "_id" : ObjectId("4b952284d8e992502c9629e3"), "_t" : "u", "fn" : "mark", "ln" : "priatel", "adrs" : { "_t" : "a", "ci" : "ottawa", "co" : "canada" }}*
  * </pre>
  *
  *
@@ -155,16 +138,12 @@ import com.mongodb.DBCollection
  *
  * <pre>
  *
- * def userData = mongo.doc{
- *    firstName("mark")
+ * def userData = mongo.doc{*    firstName("mark")
  *    lastName("priatel")
  *    company("iolog")
- *    address{
- *       city("ottawa")
+ *    address{*       city("ottawa")
  *       country("canada")
- *    }
- * }
- *
+ *}*}*
  * mongo.user.save(userData)
  *
  * println userData._id
@@ -175,220 +154,281 @@ import com.mongodb.DBCollection
  */
 public class MongoDbWrapper implements InitializingBean
 {
-   def grailsApplication
+	def grailsApplication
 
-   Map<String, Mongo> mongos = new HashMap<String, Mongo>();
-   Map<String, Object> shortcuts = new HashMap<String, Object>();
-   Map<String, Class> typeMappings = new HashMap<String, Class>()
-   Map<String, MongoMapperModel> mappersByTypeName = new HashMap<String, MongoMapperModel>()
-   Map<Class, MongoMapperModel> mappersByClass = new HashMap<Class, MongoMapperModel>()
-   Map<Class, String> typeForClassMap = new HashMap<Class, String>()
+	Map<String, Mongo> mongos = new HashMap<String, Mongo>();
+	Map<String, Object> shortcuts = new HashMap<String, Object>();
+	Map<String, Class> typeMappings = new HashMap<String, Class>()
+	Map<String, MongoMapperModel> mappersByTypeName = new HashMap<String, MongoMapperModel>()
+	Map<Class, MongoMapperModel> mappersByClass = new HashMap<Class, MongoMapperModel>()
+	Map<Class, String> typeForClassMap = new HashMap<Class, String>()
+	Map<String, Map> serverConfigs = new HashMap<String, Map>()
 
-   /**
-    *
-    * @return
-    */
-   public Map<String, MongoMapperModel> getMappers() { return mappersByTypeName }
+	/**
+	 *
+	 * @return
+	 */
+	public Map<String, MongoMapperModel> getMappers() { return mappersByTypeName }
 
-   /**
-    *
-    */
-   public MongoMapperModel getMapper(String typeName) { return mappersByTypeName.get(typeName) }
+	/**
+	 *
+	 */
+	public MongoMapperModel getMapper(String typeName) { return mappersByTypeName.get(typeName) }
 
-   /**
-    *
-    */
-   public MongoMapperModel getMapperForClass(Class c) { return mappersByClass.get(c) }
+	/**
+	 *
+	 */
+	public MongoMapperModel getMapperForClass(Class c) { return mappersByClass.get(c) }
 
-   /**
-    * given a Class, this method returns the typeName used to associate a Mongo record/document
-    * with a class
-    *
-    */
-   public String getTypeNameForClass(Class) { return typeForClassMap.get(c) }
+	/**
+	 * given a Class, this method returns the typeName used to associate a Mongo record/document
+	 * with a class
+	 *
+	 */
+	public String getTypeNameForClass(Class) { return typeForClassMap.get(c) }
 
-   /**
-    * add support so that in Groovy, databases can be referenced using
-    * mongo.<database>
-    * @param key
-    * @return
-    */
-   def Object propertyMissing(String name)
-   {
-      if (mongos.containsKey(name)) return mongos.get(name);
-      if (shortcuts.containsKey(name)) return shortcuts.get(name);
+	/**
+	 * add support so that in Groovy, databases can be referenced using
+	 * mongo.<database>
+	 * @param key
+	 * @return
+	 */
+	def Object propertyMissing(String name)
+	{
+		if (mongos.containsKey(name)) return mongos.get(name);
+		if (shortcuts.containsKey(name)) return shortcuts.get(name);
 
-      // if no MongoDB Is registered for the given key, lookup its
-      // connection details in grailsApplication.config
-      def dbConfig = grailsApplication.config.mongo.databases?."${name}"
-      if (!dbConfig)
-      {
-         throw new IllegalArgumentException("No MongoDB config found in grailsApplicaiton.config.mongo.databases.${name}")
-      }
+		// if no MongoDB Is registered for the given key, lookup its
+		// connection details in grailsApplication.config
+		def dbConfig = grailsApplication.config.mongo.databases?."${name}"
+		if (!dbConfig)
+		{
+			throw new IllegalArgumentException("No MongoDB config found in grailsApplicaiton.config.mongo.databases.${name}")
+		}
 
+		def port = dbConfig.port ? dbConfig.port : 27017
+		Mongo mongo = new Mongo(dbConfig.host, port)
+		mongos.put(name, mongo)
+		return mongo
+	}
 
-      def port = dbConfig.port ? dbConfig.port : 27017
+	/**
+	 * Makes instances of clazz mappable, so that they can be saved directly into MongoDB.
+	 */
+	def void addMappedClass(Class clazz)
+	{
+		if ( mappersByClass.containsKey(clazz) ) return;
 
+		def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
 
-      Mongo mongo = new Mongo(dbConfig.host, port)
-      
+		if (typeName)
+		{
+			def mongoFields = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoFields")
+			def mmm = new MongoMapperModel(clazz, mongoFields)
+			mmm.setTypeName(typeName)
+			this.addMapperModel(typeName, mmm)
+		}
 
-      mongos.put(name, mongo)
-      return mongo
-   }
-
-   /**
-    * during the plugin initialization domain classes which have a static
-    * 'mongoFields' property will have a MongoMapperModel created for them
-    * which are then added to the wrapper.
-    */
-   public void addMapperModel(String typeName, MongoMapperModel mmm)
-   {
-
-      typeForClassMap.put(mmm.clazz, typeName)
-      mappersByTypeName.put(typeName, mmm)
-      mappersByClass.put(mmm.clazz, mmm)
-   }
-
-   /**
-    * add Groovy helpers to MongoDB objects.
-    */
-   void afterPropertiesSet()
-   {
-      Mongo.metaClass.propertyMissing = { String name ->
-         return ((Mongo) delegate).getDB(name)
-      }
-
-      DBApiLayer.metaClass.propertyMissing = { String name ->
-         return ((DBApiLayer) delegate).getCollection(name)
-      }
-
-      DBCollection.metaClass.update = { Map crit , Map obj , Map options ->
-         boolean multi = false
-         boolean upsert = false
-         if ( options )
-         {
-            multi = options?.multi ?: false
-            upsert = options?.upsert ?: false
-         }
-
-         delegate.update( crit as BasicDBObject , obj as BasicDBObject , upsert, multi )
-      }
-
-      BasicDBList.metaClass.toObject = {
-         List oList = new ArrayList((int) delegate.size())
-         delegate.each {
-            if (it instanceof BasicDBObject || it instanceof BasicDBList) oList.add(it.toObject())
-            else oList.add(it)
-         }
-      }
-
-      Collection.metaClass.toMongoDoc = {
-         BasicDBList newList = new BasicDBList()
-         delegate.each {
-            def mapper = mappersByClass.get(it.getClass())
-            if ( mapper ) newList << mapper.buildMongoDoc(it)
-            else newList << it
-         }
-         return newList
-      }
-
-      BasicDBObject.metaClass.toObject = {
-         def typeName = delegate.get("_t")
-
-         if (!typeName)
-         {
-            return delegate
-         }
-
-         BasicDBObject _self = (BasicDBObject) delegate
-         MongoMapperModel mmm = mappersByTypeName.get(typeName)
-
-         if (!mmm)
-         {
-            return delegate
-         }
-
-         // begin mapping process to create a new object using
-         // information stored inthe MongoMapperModel
-
-         def obj = mmm.clazz.newInstance()
-         obj._id = _self._id
-
-         for (MongoMapperField mmf: mmm.fields)
-         {
-            def fieldVal = _self.get(mmf.mongoFieldName)
-
-            // if this field is mapped, unwrap it and assign it to the domain field
-            // --------------------------------------------------------------------
-            if (mmf.mapper)
-            {
-               obj."${mmf.domainFieldName}" = fieldVal.toObject()
-               continue
-            }
-
-            switch (mmf.fieldType)
-            {
-               case String:
-                  obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
-                  break
+		/**
+		 * inserts the Domain object into mongo and assigns the generated mongo document id
+		 * to _id
+		 */
+		clazz.metaClass.mongoInsert = { coll ->
+			def doc = delegate.toMongoDoc()
+			coll.insert(doc)
+			delegate._id = doc._id
+		}
 
 
-               case List:
-                  BasicDBList mongoList = (BasicDBList) _self.get(mmf.mongoFieldName)
-                  if (!mongoList)
-                  {
-                     obj."${mmf.domainFieldName}" = new ArrayList()
-                  }
-                  else
-                  {
-                     obj."${mmf.domainFieldName}" = mongoList.toObject()
-                  }
+		clazz.metaClass.mongoRemove = { coll ->
+			if (delegate._id)
+			{
+				coll.remove(new BasicDBObject([_id: delegate._id]))
+			}
+		}
 
-                  break
+		clazz.metaClass.mongoUpdate = { coll, obj ->
+			coll.update(
+				 [_id: new ObjectId(delegate._id)] as BasicDBObject,
+				 obj as BasicDBObject,
+				 false,
+				 false
+			)
+		}
 
-            }
+		clazz.metaClass.mongoRemove = { coll ->
+			coll.remove([_id: new ObjectId(delegate._id)] as BasicDBObject)
+		}
+
+		clazz.metaClass.toMongoDoc = {
+
+			def mapper = this.getMapperForClass(clazz)
+			if (!mapper)
+			{
+				def doc = new BasicDBObject()
+				doc.putAll(delegate.properties)
+			}
+			else
+			{
+				return mapper.buildMongoDoc(delegate)
+			}
+		}
+	}
+
+	/**
+	 * during the plugin initialization domain classes which have a static
+	 * 'mongoFields' property will have a MongoMapperModel created for them
+	 * which are then added to the wrapper.
+	 */
+	public void addMapperModel(String typeName, MongoMapperModel mmm)
+	{
+
+		typeForClassMap.put(mmm.clazz, typeName)
+		mappersByTypeName.put(typeName, mmm)
+		mappersByClass.put(mmm.clazz, mmm)
+	}
+
+	/**
+	 * add Groovy helpers to MongoDB objects.
+	 */
+	void afterPropertiesSet()
+	{
+
+		grailsApplication.config.mongo.databases.each { dbId, config ->
+			serverConfigs.put(dbId, config)
+		}
 
 
-         }
 
-         return obj
+		Mongo.metaClass.propertyMissing = { String name ->
+			return ((Mongo) delegate).getDB(name)
+		}
+
+		DBApiLayer.metaClass.propertyMissing = { String name ->
+			return ((DBApiLayer) delegate).getCollection(name)
+		}
+
+		DBCollection.metaClass.update = { Map crit, Map obj, Map options ->
+			boolean multi = false
+			boolean upsert = false
+			if (options)
+			{
+				multi = options?.multi ?: false
+				upsert = options?.upsert ?: false
+			}
+
+			delegate.update(crit as BasicDBObject, obj as BasicDBObject, upsert, multi)
+		}
+
+		BasicDBList.metaClass.toObject = {
+			List oList = new ArrayList((int) delegate.size())
+			delegate.each {
+				if (it instanceof BasicDBObject || it instanceof BasicDBList) oList.add(it.toObject())
+				else oList.add(it)
+			}
+		}
+
+		Collection.metaClass.toMongoDoc = {
+			BasicDBList newList = new BasicDBList()
+			delegate.each {
+				def mapper = mappersByClass.get(it.getClass())
+				if (mapper) newList << mapper.buildMongoDoc(it)
+				else newList << it
+			}
+			return newList
+		}
+
+		BasicDBObject.metaClass.toObject = {
+			def typeName = delegate.get("_t")
+
+			if (!typeName)
+			{
+				return delegate
+			}
+
+			BasicDBObject _self = (BasicDBObject) delegate
+			MongoMapperModel mmm = mappersByTypeName.get(typeName)
+
+			if (!mmm)
+			{
+				return delegate
+			}
+
+			// begin mapping process to create a new object using
+			// information stored inthe MongoMapperModel
+
+			def obj = mmm.clazz.newInstance()
+			obj._id = _self._id
+
+			for (MongoMapperField mmf: mmm.fields)
+			{
+				def fieldVal = _self.get(mmf.mongoFieldName)
+
+				// if this field is mapped, unwrap it and assign it to the domain field
+				// --------------------------------------------------------------------
+				if (mmf.mapper)
+				{
+					obj."${mmf.domainFieldName}" = fieldVal.toObject()
+					continue
+				}
+
+				switch (mmf.fieldType)
+				{
+					case String:
+						obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
+						break
 
 
-      }
+					case List:
+						BasicDBList mongoList = (BasicDBList) _self.get(mmf.mongoFieldName)
+						if (!mongoList)
+						{
+							obj."${mmf.domainFieldName}" = new ArrayList()
+						}
+						else
+						{
+							obj."${mmf.domainFieldName}" = mongoList.toObject()
+						}
 
-      grailsApplication.config.mongo.shortcuts.each { shortcutName, String path ->
-         def pathParts = path.split("\\/")
-         def obj = this."${pathParts[0]}"."${pathParts[1]}"."${pathParts[2]}"
-         if (obj) shortcuts.put(shortcutName, obj)
-      }
+						break
 
-      grailsApplication.config.mongo.mappings.each { type, className ->
-         Class c = grailsApplication.getClassForName(className)
-         typeMappings.put(type, c)
-      }
+				}
 
-   }
 
-   /**
-    * Returns a MongoDocBuilder that makes it possible to create BasicDBObjects using
-    * groovy builder syntax. Exposing a getDoc() method makes it possible to create
-    * builders on-the-fly, for example:
-    *
-    * mongo.doc{
-    *    name('jim')
-    *    age(10)
-    * }
-    }
-    */
-   public BasicDBObject doc( Closure c )
-   {
-      MongoDocBuilder db = new MongoDocBuilder(this)
-      c.setDelegate(db)
-      c.call()
-      return c.root
+			}
 
-   }
+			return obj
+		}
+
+		grailsApplication.config.mongo.shortcuts.each { shortcutName, String path ->
+			def pathParts = path.split("\\/")
+			def obj = this."${pathParts[0]}"."${pathParts[1]}"."${pathParts[2]}"
+			if (obj) shortcuts.put(shortcutName, obj)
+		}
+
+		grailsApplication.config.mongo.mappings.each { type, className ->
+			Class c = grailsApplication.getClassForName(className)
+			typeMappings.put(type, c)
+		}
+
+	}
+
+	/**
+	 * Returns a MongoDocBuilder that makes it possible to create BasicDBObjects using
+	 * groovy builder syntax. Exposing a getDoc() method makes it possible to create
+	 * builders on-the-fly, for example:
+	 *
+	 * mongo.doc{*    name('jim')
+	 *    age(10)
+	 *}}*/
+	public BasicDBObject doc(Closure c)
+	{
+		MongoDocBuilder db = new MongoDocBuilder(this)
+		c.setDelegate(db)
+		c.call()
+		return c.root
+
+	}
 
 
 }
