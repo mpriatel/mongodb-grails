@@ -66,8 +66,6 @@ class MongoMapperModel {
          mmf.domainFieldName = fieldName
          mmf.mongoFieldName = alias
 
-         println "${mmf.domainFieldName} = ${mmf.fieldType} (${mmf.isGrailsHasMany})"
-
          fields[idx++] = mmf
       }
    }

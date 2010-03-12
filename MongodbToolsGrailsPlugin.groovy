@@ -106,7 +106,6 @@ class MongodbToolsGrailsPlugin
          mapper.fields.each { MongoMapperField f ->
             def fieldMapper = mongo.getMapperForClass(f.fieldType)
             if ( fieldMapper ){
-               println "associating mapper ${fieldMapper} with ${f.domainFieldName}"
               f.mapper = fieldMapper
             }
          }
