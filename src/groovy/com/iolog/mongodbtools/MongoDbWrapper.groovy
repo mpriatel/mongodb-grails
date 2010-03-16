@@ -28,6 +28,11 @@ import com.mongodb.BasicDBList
 import com.mongodb.DBCollection
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
 import com.mongodb.ObjectId
+import com.mongodb.gridfs.GridFS
+import com.mongodb.DB
+import org.springframework.web.multipart.commons.CommonsMultipartFile
+import com.mongodb.gridfs.GridFSInputFile
+import com.mongodb.DBObject
 
 /**
  * <p>The MongoDbWrapper is exposed to Grails applications as a Spring bean called 'mongo'.
@@ -163,6 +168,7 @@ public class MongoDbWrapper implements InitializingBean
 	Map<Class, MongoMapperModel> mappersByClass = new HashMap<Class, MongoMapperModel>()
 	Map<Class, String> typeForClassMap = new HashMap<Class, String>()
 	Map<String, Map> serverConfigs = new HashMap<String, Map>()
+   Map<String,GridFS> fileGrids = new HashMap<String,GridFS>()
 
 	/**
 	 *
@@ -197,6 +203,7 @@ public class MongoDbWrapper implements InitializingBean
 	{
 		if (mongos.containsKey(name)) return mongos.get(name);
 		if (shortcuts.containsKey(name)) return shortcuts.get(name);
+      if (fileGrids.containsKey(name)) return fileGrids.get(name);
 
 		// if no MongoDB Is registered for the given key, lookup its
 		// connection details in grailsApplication.config
@@ -260,8 +267,12 @@ public class MongoDbWrapper implements InitializingBean
 			coll.remove([_id: new ObjectId(delegate._id)] as BasicDBObject)
 		}
 
-		clazz.metaClass.toMongoDoc = {
+      clazz.metaClass.getByMongoId = { id, coll = false ->
+         coll.find( [_id: new ObjectId(delegate._id) ] as BasicDBObject )
+      }
 
+
+		clazz.metaClass.toMongoDoc = {
 			def mapper = this.getMapperForClass(clazz)
 			if (!mapper)
 			{
@@ -304,6 +315,17 @@ public class MongoDbWrapper implements InitializingBean
 			return ((Mongo) delegate).getDB(name)
 		}
 
+      GridFS.metaClass.createFile = { CommonsMultipartFile file ->
+         GridFSInputFile gridFile = delegate.createFile(file.getInputStream(), file.getOriginalFilename() )
+         gridFile.setContentType( file.getFileItem().getContentType() )
+         gridFile.setFilename( file.getOriginalFilename() )
+
+         DBObject metaData = gridFile.getMetaData()
+         metaData.put("fileSize", file.getSize() )
+
+         return gridFile
+      }
+
 		DBApiLayer.metaClass.propertyMissing = { String name ->
 			return ((DBApiLayer) delegate).getCollection(name)
 		}
@@ -319,6 +341,12 @@ public class MongoDbWrapper implements InitializingBean
 
 			delegate.update(crit as BasicDBObject, obj as BasicDBObject, upsert, multi)
 		}
+
+      DBCollection.metaClass.findById = { String id ->
+         BasicDBObject query = new BasicDBObject();
+         query.put('_id' , new ObjectId(id) )
+         return delegate.findOne( query ) 
+      }
 
 		BasicDBList.metaClass.toObject = {
 			List oList = new ArrayList((int) delegate.size())
@@ -406,10 +434,18 @@ public class MongoDbWrapper implements InitializingBean
 			if (obj) shortcuts.put(shortcutName, obj)
 		}
 
-		grailsApplication.config.mongo.mappings.each { type, className ->
-			Class c = grailsApplication.getClassForName(className)
-			typeMappings.put(type, c)
-		}
+
+
+      grailsApplication.config.mongo.gridFS.each { id , config ->
+         DB db = this."${config.server}"."${config.database}"
+         String bucket = config.bucket
+         GridFS gridFS
+         if ( bucket ) gridFS = new GridFS(db,bucket)
+         else gridFS = new GridFS(db)
+
+         
+         fileGrids.put( id, gridFS )
+      }
 
 	}
 

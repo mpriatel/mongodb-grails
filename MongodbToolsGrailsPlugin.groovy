@@ -42,16 +42,19 @@ class MongodbToolsGrailsPlugin
 
 
 	def doWithDynamicMethods = { ctx ->
-		MongoDbWrapper mongo = ctx.getBean('mongo')
-		application.domainClasses.each { clz ->
 
+		MongoDbWrapper mongo = ctx.getBean('mongo')
+
+      // send all domain classes to be mapped
+      // ------------------------------------
+		application.domainClasses.each { clz ->
 			def clazz = clz.clazz
 			mongo.addMappedClass(clazz)
-
 		}
 
 		// go through all the registered mappers, and inspect their fields to see
 		// if the field class types are mapped.  if so, associate the mapper
+      // ----------------------------------------------------------------------
 		mongo.mappersByClass.each { mappedClz, mapper ->
 			mapper.fields.each { MongoMapperField f ->
 				def fieldMapper = mongo.getMapperForClass(f.fieldType)
