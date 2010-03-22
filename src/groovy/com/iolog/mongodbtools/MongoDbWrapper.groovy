@@ -402,11 +402,7 @@ public class MongoDbWrapper implements InitializingBean
 
 				switch (mmf.fieldType)
 				{
-					case String:
-						obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
-						break
-
-
+			
 					case List:
 						BasicDBList mongoList = (BasicDBList) _self.get(mmf.mongoFieldName)
 						if (!mongoList)
@@ -420,6 +416,8 @@ public class MongoDbWrapper implements InitializingBean
 
 						break
 
+					default:
+						obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
 				}
 
 
