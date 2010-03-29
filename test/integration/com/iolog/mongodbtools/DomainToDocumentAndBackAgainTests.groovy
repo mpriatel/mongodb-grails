@@ -9,7 +9,8 @@ class DomainToDocumentAndBackAgainTests extends GrailsUnitTestCase {
     def mongo   
     def collection
     def date
-    def widget
+    def mappedWidget
+    def annotatedWidget
     
     protected void setUp() {
         super.setUp()
@@ -18,13 +19,23 @@ class DomainToDocumentAndBackAgainTests extends GrailsUnitTestCase {
         collection.drop()
         
         date = new GregorianCalendar(2010, Calendar.JANUARY, 21, 11, 22, 56).time
-        widget = new MappedWidget(
+        
+        mappedWidget = new MappedWidget(
             stockCount: 20, 
             length: 10.10, 
-            description: 'A Mapped Widget', 
+            description: 'A New Widget', 
             createDate: date, 
             active: true,
             stockNumbers: [1,2,3,4,5,6,7,8,9])
+            
+        annotatedWidget = new AnnotatedWidget(
+            stockCount: 20, 
+            length: 10.10, 
+            description: 'A New Widget', 
+            createDate: date, 
+            active: true,
+            stockNumbers: [1,2,3,4,5,6,7,8,9])
+        
     }
 
     protected void tearDown() {
@@ -32,27 +43,36 @@ class DomainToDocumentAndBackAgainTests extends GrailsUnitTestCase {
     }
 
     void testDomainObjectToMongoDoc() {
-        def mongoDoc = widget.toMongoDoc()
-        assertEquals 20, mongoDoc.sc
-        assertEquals 10.10, mongoDoc.l
-        assertEquals 'A Mapped Widget', mongoDoc.d 
-        assertEquals date, mongoDoc.cd
-        assertEquals true, mongoDoc.a
-        assertEquals ([1,2,3,4,5,6,7,8,9], mongoDoc.sn)
+        verifyMongoDoc mappedWidget.toMongoDoc()
+        verifyMongoDoc annotatedWidget.toMongoDoc()        
+    }
+    
+    private void verifyMongoDoc(doc) {
+        assertEquals 20, doc.sc
+        assertEquals 10.10, doc.l
+        assertEquals 'A New Widget', doc.d 
+        assertEquals date, doc.cd
+        assertEquals true, doc.a
+        assertEquals ([1,2,3,4,5,6,7,8,9], doc.sn)
     }
     
     void testMongoDocToDomainObject() {
-        collection.save( widget.toMongoDoc() ) 
+        collection.save( mappedWidget.toMongoDoc() ) 
         def cursor = collection.find()
         assertEquals 1, cursor.count()
         def mongoWidget = cursor.next().toObject()
         
-        assertEquals 20, mongoWidget.stockCount
-        assertEquals 10.10, mongoWidget.length
-        assertEquals 'A Mapped Widget', mongoWidget.description 
-        assertEquals date, mongoWidget.createDate
-        assertEquals true, mongoWidget.active
-        assertEquals ([1,2,3,4,5,6,7,8,9], mongoWidget.stockNumbers)
-        assertNotNull mongoWidget._id
+        verifyDomainObject mongoWidget
     }
+    
+    private void verifyDomainObject(widget) {
+        assertEquals 20, widget.stockCount
+        assertEquals 10.10, widget.length
+        assertEquals 'A New Widget', widget.description 
+        assertEquals date, widget.createDate
+        assertEquals true, widget.active
+        assertEquals ([1,2,3,4,5,6,7,8,9], widget.stockNumbers)
+        assertNotNull widget._id
+    }
+    
 }

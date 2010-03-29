@@ -227,11 +227,25 @@ public class MongoDbWrapper implements InitializingBean
 		if ( mappersByClass.containsKey(clazz) ) return;
 
 		def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
-
+        
 		if (typeName)
 		{
 			def mongoFields = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoFields")
 			def mmm = new MongoMapperModel(clazz, mongoFields)
+			mmm.setTypeName(typeName)
+			this.addMapperModel(typeName, mmm)
+		}
+		else if (clazz.isAnnotationPresent(MongoCollection.class)) 
+		{
+		    typeName = clazz.getAnnotation(MongoCollection.class).value()
+		    def fields = clazz.declaredFields
+		    def mongoFields = [:]
+		    fields.each { field->
+		        if (field.getAnnotation(MongoField.class)) {
+		            mongoFields.put field.getAnnotation(MongoField.class).value(), field.name
+                }
+		    }
+		    def mmm = new MongoMapperModel(clazz, mongoFields)
 			mmm.setTypeName(typeName)
 			this.addMapperModel(typeName, mmm)
 		}
