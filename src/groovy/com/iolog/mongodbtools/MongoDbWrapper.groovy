@@ -384,8 +384,7 @@ public class MongoDbWrapper implements InitializingBean
 			def typeName = delegate.get("_t")
 
 			if (!typeName)
-			{
-				return delegate
+			{                                				return delegate
 			}
 
 			BasicDBObject _self = (BasicDBObject) delegate
