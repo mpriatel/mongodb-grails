@@ -226,6 +226,12 @@ public class MongoDbWrapper implements InitializingBean
 	{
 		if ( mappersByClass.containsKey(clazz) ) return;
 
+        // if isMappedByFieldMap(clazz) {
+        //   mapByFieldMap(clazz)
+        // } else if isMappedByAnnotations(clazz) {
+        //   mapByAnnotations(clazz)
+        // }
+
 		def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
         
 		if (typeName)
@@ -428,7 +434,20 @@ public class MongoDbWrapper implements InitializingBean
 						}
 
 						break
-
+						
+					case Map:
+					  BasicDBObject mongoMap = (BasicDBObject) _self.get(mmf.mongoFieldName)
+					  if (!mongoMap)
+					  {
+              obj."${mmf.domainFieldName}" = new HashMap()
+					  }
+            else
+            {
+              obj."${mmf.domainFieldName}" = mongoMap.toMap()
+            }
+            
+            break
+            
 					default:
 						obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
 				}

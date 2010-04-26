@@ -11,6 +11,7 @@ class MappedWidget {
     Date createDate
     boolean active
     List stockNumbers
+    Map features
     
     static mongoTypeName = 'mappedwidget'
     static mongoFields = [
@@ -19,7 +20,8 @@ class MappedWidget {
         'd'  : 'description',
         'cd' : 'createDate',
         'a'  : 'active',
-        'sn' : 'stockNumbers'
+        'sn' : 'stockNumbers',
+        'f'  : 'features'
     ]
 
 }

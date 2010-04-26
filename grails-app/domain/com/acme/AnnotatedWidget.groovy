@@ -28,4 +28,7 @@ class AnnotatedWidget {
     @MongoField('sn')
     List stockNumbers
     
+    @MongoField('f')
+    Map features
+    
 }

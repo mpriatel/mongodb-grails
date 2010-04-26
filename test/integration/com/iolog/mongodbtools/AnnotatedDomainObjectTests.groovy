@@ -20,7 +20,8 @@ class AnnotatedDomainObjectTests extends MongoDbTestCase {
             description: 'A New Widget with annotations', 
             createDate: date, 
             active: true,
-            stockNumbers: [9,8,7,6,5,4,3,2,1])    
+            stockNumbers: [9,8,7,6,5,4,3,2,1],
+            features: [a:1, b:'two', c:3.0])    
     }
 
     void testDomainObjectToMongoDocShouldContainAllDomainFieldsByAlias() {
@@ -33,6 +34,7 @@ class AnnotatedDomainObjectTests extends MongoDbTestCase {
         assertEquals date, doc.cd
         assertEquals true, doc.a
         assertEquals ([9,8,7,6,5,4,3,2,1], doc.sn)
+        assertEquals ([a:1, b:'two', c:3.0], doc.f)
         assertNull doc._id        
         assertNull doc.unmappedField
     }
@@ -50,6 +52,10 @@ class AnnotatedDomainObjectTests extends MongoDbTestCase {
         assertEquals date, widget.createDate
         assertEquals true, widget.active
         assertEquals ([9,8,7,6,5,4,3,2,1], widget.stockNumbers)
+        def features = widget.features
+        assertEquals 1, features.a
+        assertEquals 'two', features.b
+        assertEquals 3.0, features.c
         assertNotNull widget._id
     }
 

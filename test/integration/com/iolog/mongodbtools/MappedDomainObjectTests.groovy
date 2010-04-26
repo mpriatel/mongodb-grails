@@ -20,7 +20,8 @@ class MappedDomainObjectTests extends MongoDbTestCase {
             description: 'A New Widget', 
             createDate: date, 
             active: true,
-            stockNumbers: [1,2,3,4,5,6,7,8,9])    
+            stockNumbers: [1,2,3,4,5,6,7,8,9],
+            features: [a:1, b:'two', c:3.0])    
     }
 
     void testDomainObjectToMongoDocShouldContainAllDomainFieldsByAlias() {
@@ -33,6 +34,7 @@ class MappedDomainObjectTests extends MongoDbTestCase {
         assertEquals date, doc.cd
         assertEquals true, doc.a
         assertEquals ([1,2,3,4,5,6,7,8,9], doc.sn)
+        assertEquals ([a:1, b:'two', c:3.0], doc.f)
         assertNull doc._id        
         assertNull doc.unmappedField
     }
@@ -50,6 +52,10 @@ class MappedDomainObjectTests extends MongoDbTestCase {
         assertEquals date, widget.createDate
         assertEquals true, widget.active
         assertEquals ([1,2,3,4,5,6,7,8,9], widget.stockNumbers)
+        def features = widget.features
+        assertEquals 1, features.a
+        assertEquals 'two', features.b
+        assertEquals 3.0, features.c
         assertNotNull widget._id
     }
 
