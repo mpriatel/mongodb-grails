@@ -27,6 +27,7 @@ class DomainObjectMappingTests extends MongoDbTestCase {
 
     annotatedWidget = new AnnotatedWidget( props )
     mappedWidget = new MappedWidget( props )
+  
   }
 
   void testDomainObjectToMongoDocShouldContainAllDomainFieldsByAlias() {
@@ -36,7 +37,19 @@ class DomainObjectMappingTests extends MongoDbTestCase {
     
   }
   
+  void testMongoDocToDomainObjectShouldContainAllDocumentFieldsByName() {
+
+    def widget
+    widget = saveAndRetrieve( annotatedWidget )
+    verifyDomain widget
+    
+    widget = saveAndRetrieve( mappedWidget )
+    verifyDomain widget
+  
+  }
+  
   def verifyDoc = { doc ->
+  
     assertEquals 50, doc.sc
     assertEquals 11.11, doc.l
     assertEquals 'A New Widget', doc.d 
@@ -46,28 +59,21 @@ class DomainObjectMappingTests extends MongoDbTestCase {
     assertEquals ([a:1, b:'two', c:3.0], doc.f)
     assertNull doc._id        
     assertNull doc.unmappedField
+  
   }
   
-  void testMongoDocToDomainObjectShouldContainAllDocumentFieldsByName() {
-
-      collection.save( annotatedWidget.toMongoDoc() ) 
-      def cursor = collection.find()
-      assertEquals 1, cursor.count()
-      def widget = cursor.next().toObject()
-      
-      verifyDomain widget
-      
-      collection.drop()
-      
-      collection.save( mappedWidget.toMongoDoc() ) 
-      cursor = collection.find()
-      assertEquals 1, cursor.count()
-      widget = cursor.next().toObject()
-      
-      verifyDomain widget
+  def saveAndRetrieve = { widget ->
+  
+    collection.drop()
+    collection.save( widget.toMongoDoc() ) 
+    def cursor = collection.find()
+    assertEquals 1, cursor.count()
+    return cursor.next().toObject()
+  
   }
     
   def verifyDomain = { widget ->
+  
     assertEquals 50, widget.stockCount
     assertEquals 11.11, widget.length
     assertEquals 'A New Widget', widget.description 
