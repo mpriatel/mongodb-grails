@@ -13,7 +13,9 @@ class MongodbToolsGrailsPlugin
 	def dependsOn = [:]
 	def pluginExcludes = [
 		 "grails-app/views/error.gsp",
-		 "grails-app/config/Config.groovy"  // just used for stand-alone testing
+		 "grails-app/config/Config.groovy",  // just used for stand-alone testing
+		 "grails-app/domain/com/acme/AnnotatedWidget.groovy",
+		 "grails-app/domain/com/acme/MappedWidget.groovy"	
 	]
 
 	def author = "Mark Priatel"
