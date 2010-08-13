@@ -352,6 +352,10 @@ public class MongoDbWrapper implements InitializingBean
          return gridFile
       }
 
+      GridFS.metaClass.findById = {  Object id ->
+         return delegate.findOne( new ObjectId(id) )
+      }
+
 		DBApiLayer.metaClass.propertyMissing = { String name ->
 			return ((DBApiLayer) delegate).getCollection(name)
 		}
@@ -473,6 +477,7 @@ public class MongoDbWrapper implements InitializingBean
 
 
       grailsApplication.config.mongo.gridFS.each { id , config ->
+
          DB db = this."${config.server}"."${config.database}"
          String bucket = config.bucket
          GridFS gridFS
