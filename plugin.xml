@@ -10,15 +10,19 @@
   <documentation>http://grails.org/plugin/mongodb-tools</documentation>
   <resources>
     <resource>BuildConfig</resource>
+    <resource>Config</resource>
     <resource>DataSource</resource>
     <resource>UrlMappings</resource>
+    <resource>com.iolog.mongodbtools.MongoStatusController</resource>
+    <resource>com.acme.AnnotatedWidget</resource>
+    <resource>com.acme.MappedWidget</resource>
   </resources>
   <dependencies>
     <resolvers>
       <resolver type='grailsPlugins' name='grailsPlugins' />
       <resolver type='mavenCentral' />
     </resolvers>
-    <dependency group='org.mongodb' name='mongo-java-driver' version='1.2.1' conf='runtime' transitive='true' />
+    <dependency group='org.mongodb' name='mongo-java-driver' version='1.4' conf='runtime' transitive='true' />
   </dependencies>
   <behavior />
 </plugin>

@@ -218,6 +218,36 @@ public class MongoDbWrapper implements InitializingBean
 		mongos.put(name, mongo)
 		return mongo
 	}
+	
+	def isMappedByFieldMap = { clazz ->
+	  return GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName") != null
+	}
+	
+	def mapByFieldMap = { clazz ->
+	  def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
+		def mongoFields = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoFields")
+		def mmm = new MongoMapperModel(clazz, mongoFields)
+		mmm.setTypeName(typeName)
+		this.addMapperModel(typeName, mmm)
+	}
+	
+	def isMappedByAnnotations = { clazz -> 
+	  return clazz.isAnnotationPresent(MongoCollection.class)
+	}
+	
+	def mapByAnnotations = { clazz ->
+	  def typeName = clazz.getAnnotation(MongoCollection.class).value()
+		def fields = clazz.declaredFields
+	  def mongoFields = [:]
+		fields.each { field->
+		  if (field.getAnnotation(MongoField.class)) {
+		    mongoFields.put field.getAnnotation(MongoField.class).value(), field.name
+      }
+		}
+		def mmm = new MongoMapperModel(clazz, mongoFields)
+	  mmm.setTypeName(typeName)
+		this.addMapperModel(typeName, mmm)
+	}
 
 	/**
 	 * Makes instances of clazz mappable, so that they can be saved directly into MongoDB.
@@ -226,15 +256,11 @@ public class MongoDbWrapper implements InitializingBean
 	{
 		if ( mappersByClass.containsKey(clazz) ) return;
 
-		def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
-
-		if (typeName)
-		{
-			def mongoFields = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoFields")
-			def mmm = new MongoMapperModel(clazz, mongoFields)
-			mmm.setTypeName(typeName)
-			this.addMapperModel(typeName, mmm)
-		}
+    if (isMappedByFieldMap(clazz)) {
+      mapByFieldMap(clazz)
+    } else if (isMappedByAnnotations(clazz)) {
+      mapByAnnotations(clazz)
+    }
 
 		/**
 		 * inserts the Domain object into mongo and assigns the generated mongo document id
@@ -418,7 +444,20 @@ public class MongoDbWrapper implements InitializingBean
 						}
 
 						break
-
+						
+					case Map:
+					  BasicDBObject mongoMap = (BasicDBObject) _self.get(mmf.mongoFieldName)
+					  if (!mongoMap)
+					  {
+              obj."${mmf.domainFieldName}" = new HashMap()
+					  }
+            else
+            {
+              obj."${mmf.domainFieldName}" = mongoMap.toMap()
+            }
+            
+            break
+            
 					default:
 						obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
 				}

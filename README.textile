@@ -70,7 +70,7 @@ p. To register your Domain class with a mapper you need to add two static helper
     String lastName
 
     static mongoTypeName = "user"
-    static mongoMappedFields = ['fn':firstName','ln':'lastName']
+    static mongoFields = ['fn':firstName','ln':'lastName']
   }
 </pre>
 
@@ -102,7 +102,7 @@ p. The mapper will also process mapped properties and Lists:
      String country
 
      static mongoTypeName = "address"
-     static mongoMappedFields = [ 'ci':'city' , 'co' : 'country' ]
+     static mongoFields = [ 'ci':'city' , 'co' : 'country' ]
   }
 
   class User{
@@ -111,7 +111,7 @@ p. The mapper will also process mapped properties and Lists:
     Address address
 
     static mongoTypeName = "user"
-    static mongoMappedFields = ['fn':firstName','ln':'lastName','adrs':'address']
+    static mongoFields = ['fn':firstName','ln':'lastName','adrs':'address']
   }
 
   def adrs = new Address( city:'ottawa' , country:'canada' )
