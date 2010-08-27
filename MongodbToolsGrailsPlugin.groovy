@@ -4,11 +4,11 @@ import com.iolog.mongodbtools.MongoMapperModel
 import com.mongodb.BasicDBObject
 import com.iolog.mongodbtools.MongoDbWrapper
 import com.iolog.mongodbtools.MongoMapperField
-import com.mongodb.ObjectId
+import org.bson.types.ObjectId
 
 class MongodbToolsGrailsPlugin
 {
-	def version = "0.1"
+	def version = "0.1x"
 	def grailsVersion = "1.2.0 > *"
 	def dependsOn = [:]
 	def pluginExcludes = [

@@ -17,12 +17,12 @@ class DomainObjectMappingTests extends MongoDbTestCase {
 
     def props = [
       stockCount: 50, 
-      length: 11.11, 
+      length: new Double(11.11), 
       description: 'A New Widget', 
       createDate: date, 
       active: true,
       stockNumbers: [9,8,7,6,5,4,3,2,1],
-      features: [a:1, b:'two', c:3.0]
+      features: [a:1, b:'two', c:new Double(3.0)]
     ]
 
     annotatedWidget = new AnnotatedWidget( props )
@@ -51,12 +51,12 @@ class DomainObjectMappingTests extends MongoDbTestCase {
   def verifyDoc = { doc ->
   
     assertEquals 50, doc.sc
-    assertEquals 11.11, doc.l
+    assertEquals 11.11D, doc.l
     assertEquals 'A New Widget', doc.d 
     assertEquals date, doc.cd
     assertEquals true, doc.a
     assertEquals ([9,8,7,6,5,4,3,2,1], doc.sn)
-    assertEquals ([a:1, b:'two', c:3.0], doc.f)
+    assertEquals ([a:1, b:'two', c:3.0D], doc.f)
     assertNull doc._id        
     assertNull doc.unmappedField
   
@@ -65,7 +65,8 @@ class DomainObjectMappingTests extends MongoDbTestCase {
   def saveAndRetrieve = { widget ->
   
     collection.drop()
-    collection.save( widget.toMongoDoc() ) 
+    def doc = widget.toMongoDoc()
+    collection.save( doc ) 
     def cursor = collection.find()
     assertEquals 1, cursor.count()
     return cursor.next().toObject()
@@ -75,7 +76,7 @@ class DomainObjectMappingTests extends MongoDbTestCase {
   def verifyDomain = { widget ->
   
     assertEquals 50, widget.stockCount
-    assertEquals 11.11, widget.length
+    assertEquals 11.11D, widget.length
     assertEquals 'A New Widget', widget.description 
     assertEquals date, widget.createDate
     assertEquals true, widget.active
@@ -83,7 +84,7 @@ class DomainObjectMappingTests extends MongoDbTestCase {
     def features = widget.features
     assertEquals 1, features.a
     assertEquals 'two', features.b
-    assertEquals 3.0, features.c
+    assertEquals 3.0D, features.c
     assertNotNull widget._id
     
   }

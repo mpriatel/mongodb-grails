@@ -1,12 +1,10 @@
 package com.acme
 
-import com.mongodb.ObjectId
-
 class MappedWidget {
 
     String _id
     int stockCount
-    double length
+    Double length
     String description
     Date createDate
     boolean active

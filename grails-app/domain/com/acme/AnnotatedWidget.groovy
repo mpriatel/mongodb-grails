@@ -1,8 +1,7 @@
 package com.acme
 
-import com.mongodb.ObjectId
-
 import com.iolog.mongodbtools.*
+import org.bson.types.ObjectId
 
 @MongoCollection('annotatedWidget')
 class AnnotatedWidget {
@@ -11,10 +10,10 @@ class AnnotatedWidget {
     String _id
     
     @MongoField('sc')
-    int stockCount
+    Integer stockCount
     
     @MongoField('l')
-    double length
+    Double length
     
     @MongoField('d')
     String description

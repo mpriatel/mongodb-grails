@@ -27,12 +27,13 @@ import com.mongodb.BasicDBObject
 import com.mongodb.BasicDBList
 import com.mongodb.DBCollection
 import org.codehaus.groovy.grails.commons.GrailsClassUtils
-import com.mongodb.ObjectId
+
 import com.mongodb.gridfs.GridFS
 import com.mongodb.DB
 import org.springframework.web.multipart.commons.CommonsMultipartFile
 import com.mongodb.gridfs.GridFSInputFile
 import com.mongodb.DBObject
+import org.bson.types.ObjectId
 
 /**
  * <p>The MongoDbWrapper is exposed to Grails applications as a Spring bean called 'mongo'.
@@ -64,7 +65,7 @@ import com.mongodb.DBObject
  *
  * <p>The above example registers two different database hosts which can then be accessed using the mongo
  * bean: <code>mongo.server1.&lt;dbname&gt;.&lt;collection&gt;</code>.  'dbname' and 'collection' will
- * return the corrisponding Java MongoDB driver equivalents (DB, DBCollection). 
+ * return the corrisponding Java MongoDB driver equivalents (DB, DBCollection).
  *
  * <h3>Shortcuts</h3>
  *
@@ -218,11 +219,11 @@ public class MongoDbWrapper implements InitializingBean
 		mongos.put(name, mongo)
 		return mongo
 	}
-	
+
 	def isMappedByFieldMap = { clazz ->
 	  return GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName") != null
 	}
-	
+
 	def mapByFieldMap = { clazz ->
 	  def typeName = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoTypeName")
 		def mongoFields = GrailsClassUtils.getStaticPropertyValue(clazz, "mongoFields")
@@ -230,11 +231,11 @@ public class MongoDbWrapper implements InitializingBean
 		mmm.setTypeName(typeName)
 		this.addMapperModel(typeName, mmm)
 	}
-	
-	def isMappedByAnnotations = { clazz -> 
+
+	def isMappedByAnnotations = { clazz ->
 	  return clazz.isAnnotationPresent(MongoCollection.class)
 	}
-	
+
 	def mapByAnnotations = { clazz ->
 	  def typeName = clazz.getAnnotation(MongoCollection.class).value()
 		def fields = clazz.declaredFields
@@ -294,7 +295,7 @@ public class MongoDbWrapper implements InitializingBean
 		}
 
       clazz.metaClass.getByMongoId = { id, coll = false ->
-         coll.find( [_id: new ObjectId(delegate._id) ] as BasicDBObject )
+         coll.findOne( [_id: new ObjectId(delegate._id) ] as BasicDBObject )
       }
 
 
@@ -375,7 +376,7 @@ public class MongoDbWrapper implements InitializingBean
       DBCollection.metaClass.findById = { String id ->
          BasicDBObject query = new BasicDBObject();
          query.put('_id' , new ObjectId(id) )
-         return delegate.findOne( query ) 
+         return delegate.findOne( query )
       }
 
 		BasicDBList.metaClass.toObject = {
@@ -431,7 +432,7 @@ public class MongoDbWrapper implements InitializingBean
 
 				switch (mmf.fieldType)
 				{
-			
+
 					case List:
 						BasicDBList mongoList = (BasicDBList) _self.get(mmf.mongoFieldName)
 						if (!mongoList)
@@ -444,7 +445,7 @@ public class MongoDbWrapper implements InitializingBean
 						}
 
 						break
-						
+
 					case Map:
 					  BasicDBObject mongoMap = (BasicDBObject) _self.get(mmf.mongoFieldName)
 					  if (!mongoMap)
@@ -455,9 +456,9 @@ public class MongoDbWrapper implements InitializingBean
             {
               obj."${mmf.domainFieldName}" = mongoMap.toMap()
             }
-            
+
             break
-            
+
 					default:
 						obj."${mmf.domainFieldName}" = _self.get(mmf.mongoFieldName)
 				}
@@ -484,7 +485,7 @@ public class MongoDbWrapper implements InitializingBean
          if ( bucket ) gridFS = new GridFS(db,bucket)
          else gridFS = new GridFS(db)
 
-         
+
          fileGrids.put( id, gridFS )
       }
 
