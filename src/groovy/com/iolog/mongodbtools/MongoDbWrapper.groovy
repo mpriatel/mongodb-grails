@@ -214,7 +214,7 @@ public class MongoDbWrapper implements InitializingBean
 			throw new IllegalArgumentException("No MongoDB config found in grailsApplicaiton.config.mongo.databases.${name}")
 		}
 
-		def port = dbConfig.port ? dbConfig.port : 27017
+		def port = dbConfig.port as int ? dbConfig.port as int: 27017
 		Mongo mongo = new Mongo(dbConfig.host, port)
 		mongos.put(name, mongo)
 		return mongo

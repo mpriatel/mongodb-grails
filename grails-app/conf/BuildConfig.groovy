@@ -17,7 +17,7 @@ grails.project.dependency.resolution = {
     }
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
-         runtime 'org.mongodb:mongo-java-driver:2.1'
+         runtime 'org.mongodb:mongo-java-driver:2.4'
     }
 
 }
